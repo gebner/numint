@@ -1,9 +1,7 @@
 function I = newton_cotes(f, a,b, d, n),
+n = ceil((n-d-1)/d);
 w = d * (vander((0:d)/d)' \ (1./fliplr(1:d+1))')';
-weights = [w(1:end-1)...
-  repmat(w(1:end-1) + [w(end) zeros(1, length(w)-2)],...
-    1, ceil((n-length(w))/(length(w)-1)))...
-  w(end)];
-x = linspace(a,b, length(weights));
+w = [w(1:end-1) repmat(w(1:end-1) + [w(end) zeros(1, d-1)], 1, n) w(end)];
+x = linspace(a,b, length(w));
 h = x(2) - x(1);
-I = h * weights * f(x)';
+I = h * w * f(x)';
