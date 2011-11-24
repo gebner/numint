@@ -9,5 +9,6 @@ n = ceil((n-1)/(d+2));
 w = (d+2) * (vander((1:d+1)/(d+2))' \ (1./fliplr(1:d+1))')';
 w = [repmat([0 w], 1, n) 0];
 x = linspace(a,b, length(w));
+w = w(2:end-1); x = x(2:end-1);
 h = x(2) - x(1);
 I = h * w * f(x)';
