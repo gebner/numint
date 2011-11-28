@@ -36,4 +36,23 @@ der Form \([a + kh, a + (k+1)h]\) angewendet wird.
 
 % FIXME: Hermite-Bedingung verwenden
 
+\section{Romberg-Quadratur}
+
+Bei der Romberg-Quadratur wird von der summierten Trapezregel aus.
+Wir wählen Schrittweite $h_n = \frac{b-a}{2^{n-1}}$
+
+\begin{align*}
+\int_a^b f(x) dx = \lim_{k \rightarrow \infty} I_{1,k}
+\end{align*}
+
+wobei 
+
+\begin{align*}
+I_{1,1} = \frac{b-a}{2^n} \dot (f(b) + f(a))\\
+I_{n,1} = \frac{b-a}{2^n} \cdot \left( f(a) + f(b) + 2 \cdot \sum_{i = 1}^{2^{n-1}-1} f(a + \frac{i \cdot (b-a)}{2^{n-1}} \right)\\
+I_{n,k} = I_{n+1, k-1} + \dfrac{I_{n+1, k-1} - I_{n, k-1}}{2^{2 \cdot (k-1)}-1}
+\end{align*}.
+
+Das Schema erfolgt also rekursiv nach dem Nevilleverfahren.
+
 \end{document}
