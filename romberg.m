@@ -27,9 +27,9 @@ while (finished ~= 1)
    for j = 1:(2^(i-1)-1)
        pos = pos + (b-a)/2^(i-1); % position
        fpos = 2*f(pos);
-       if (isnan(fpos) || isinf(fpos)) 
-           fpos = f(pos + 2^(-i-1)) + f(pos - 2^(-i-1));
-       end
+%       if (isnan(fpos) || isinf(fpos)) 
+%           fpos = f(pos + 2^(-i-1)) + f(pos - 2^(-i-1));
+%       end
        trapezsum = trapezsum + fpos;
    end
    d(i) = (b-a)/2^i * trapezsum; 

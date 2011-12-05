@@ -29,7 +29,7 @@ function [I,Err,tN,tR,tG]=NumIntStep(f,a,b,epsilon)
          N6=newton_cotes(f,a,b,6,7);
          N7=newton_cotes(f,a,b,7,8);
          N=newton_cotes(f,a,b,8,9);
-         eN=min(abs(N-N7),abs(N-N6))/N;
+         eN=abs(min(abs(N-N7),abs(N-N6))/N);
          tN=toc;
          tic;
          [G,eG]=integrieren_gauss(f,a,b,epsilon);
