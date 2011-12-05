@@ -1,0 +1,70 @@
+function [I,Err]=NumInt(f,a,b,epsilon)
+    t=tic;
+    if epsilon<10^-15
+        epsilon=10^-15;
+    end
+    I=zeros(1,floor(1/epsilon));
+%    [I,Err]=NumIntStep(f,a,b,epsilon,I,1);
+    size(I)
+    I=sum(I);
+    tic-t
+end
+
+function [I,Err,i]=NumIntStep(f,a,b,epsilon,I,i)
+     if abs(b-a)<max(epsilon,10^-15)
+          if abs(f(a))<=abs(f(b))
+              I(i)=(b-a)*f(a);
+          else
+              I(i)=(b-a)*f(b);
+          end
+     Err=epsilon;
+     i=i+1;
+     else
+         [R,eR]=romberg(f,a,b,epsilon);
+         N6=newton_cotes(f,a,b,10,7);
+         N7=newton_cotes(f,a,b,11,8);
+         N=newton_cotes(f,a,b,12,9);
+         eN=min(abs(N-N7),abs(N-N6))/N;
+         [G,eG]=integrieren_gauss(f,a,b,epsilon);
+         if min([eR,eN,eG])<epsilon
+             if ~isnan(R) && eR<=eN && eR<=eG
+                 if abs(R-N)<=eN && abs(R-G)<=eN
+                    I(i)=R;
+                    Err=eR;
+                    i=i+1;
+                 else
+                     [I,E1,i]=NumIntStep(f,a,(a+b)/2,epsilon*sqrt(2),I,i);
+                     [I,E2,i]=NumIntStep(f,(a+b)/2,b,epsilon*sqrt(2),I,i);
+                     Err=max(E1,E2);
+                 end
+             else
+             if eR<=eG && eR<=eN
+                 if abs(R-G)<=eR && abs(R-N)<=eR
+                    I(i)=N;
+                    Err=eN;
+                    i=i+1;
+                 else
+                     [I,E1,i]=NumIntStep(f,a,(a+b)/2,epsilon*sqrt(2),I,i);
+                     [I,E2,i]=NumIntStep(f,(a+b)/2,b,epsilon*sqrt(2),I,i);
+                     Err=max(E1,E2);
+                 end
+             else
+                 if abs(R-G)<=eG && abs(N-G)<=eG
+                    I(i)=G;
+                    Err=eG;
+                    i=i+1;
+                 else
+                     [I,E1,i]=NumIntStep(f,a,(a+b)/2,epsilon*sqrt(2),I,i);
+                     [I,E2,i]=NumIntStep(f,(a+b)/2,b,epsilon*sqrt(2),I,i);
+                     Err=max(E1,E2);
+                 end
+             end
+             end
+         else
+                     [I,E1,i]=NumIntStep(f,a,(a+b)/2,epsilon*sqrt(2),I,i);
+                     [I,E2,i]=NumIntStep(f,(a+b)/2,b,epsilon*sqrt(2),I,i);
+                     Err=max(E1,E2);
+         end
+     end
+end 
+             

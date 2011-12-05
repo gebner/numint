@@ -1,0 +1,85 @@
+function [I,Err]=NumInt(f,a,b,epsilon)
+    t=tic;
+    if epsilon<10^-15
+        epsilon=10^-15;
+    end
+    I=zeros(1,2^-floor(log2(epsilon)));
+    A=zeros(1,4)
+    [I,Err,i,A]=NumIntStep(f,a,b,epsilon,I,1,A);
+    size(I)
+    I=sum(I);
+    tic-t
+    A
+end
+
+function [I,Err,i,A]=NumIntStep(f,a,b,epsilon,I,i,A)
+     if abs(b-a)<max(epsilon,10^-15)
+          if abs(f(a))<=abs(f(b))
+              I(i)=(b-a)*f(a);
+          else
+              I(i)=(b-a)*f(b);
+          end
+     Err=epsilon;
+     i=i+1;
+     else
+         [R,eR]=romberg(f,a,b,epsilon);
+         if isnan(eR) || isinf(eR)
+             eR=inf;
+         end
+         N6=newton_cotes(f,a,b,10,7);
+         N7=newton_cotes(f,a,b,11,8);
+         N=newton_cotes(f,a,b,12,9);
+         eN=min(abs(N-N7),abs(N-N6))/N;
+         if isnan(eN) || isinf(eN)
+             eN=inf;
+         end
+         [G,eG]=integrieren_gauss(f,a,b,epsilon);
+         if isnan(eG) || isinf(eG)
+             eG=inf;
+         end
+         if min([eR,eN,eG])<epsilon
+             if ~isnan(R) && ~isinf(R) && eR<=eN && eR<=eG
+                 if abs(R-N)<=2*eN && abs(R-G)<=2*eG
+                    I(i)=R;
+                    Err=eR;
+                    i=i+1;
+                 else
+                     [I,E1,i,A]=NumIntStep(f,a,(a+b)/2,epsilon,I,i,A);
+                     [I,E2,i,A]=NumIntStep(f,(a+b)/2,b,epsilon,I,i,A);
+                     Err=max(E1,E2);
+                     A(1)=A(1)+1;
+                 end
+             else
+             if ~isnan(N) && ~isinf(N) && eN<=eG && eN<=eR
+                 if abs(N-G)<=2*eG && abs(R-N)<=2*eR
+                    I(i)=N;
+                    Err=eN;
+                    i=i+1;
+                 else
+                     [I,E1,i,A]=NumIntStep(f,a,(a+b)/2,epsilon,I,i,A);
+                     [I,E2,i,A]=NumIntStep(f,(a+b)/2,b,epsilon,I,i,A);
+                     Err=max(E1,E2);
+                     A(2)=A(2)+1;
+                 end
+             else
+                 if abs(R-G)<=2*eR && abs(N-G)<=2*eN
+                    I(i)=G;
+                    Err=eG;
+                    i=i+1;
+                 else
+                     [I,E1,i,A]=NumIntStep(f,a,(a+b)/2,epsilon,I,i,A);
+                     [I,E2,i,A]=NumIntStep(f,(a+b)/2,b,epsilon,I,i,A);
+                     Err=max(E1,E2);
+                     A(3)=A(3)+1;
+                 end
+             end
+             end
+         else
+                     [I,E1,i,A]=NumIntStep(f,a,(a+b)/2,epsilon,I,i,A);
+                     [I,E2,i,A]=NumIntStep(f,(a+b)/2,b,epsilon,I,i,A);
+                     A(4)=A(4)+1;
+                     Err=max(E1,E2);
+         end
+     end
+end 
+             

@@ -4,9 +4,9 @@ function [integral , failure] = romberg(f, a, b, epsilon)
 
 
 delta = 1/10^9;
-iMin = 3; % min index
+iMin = 8; % min index
 d = zeros(iMin, 1); %diagonal values
-iMax = 22; % max index
+iMax = 10; % max index
 finished = 0;
 i = 1;
 
