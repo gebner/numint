@@ -1,5 +1,9 @@
 function [I,Err]=NumInt(f,a,b,epsilon)
 % NUMINT performs numeric integration
+% @param[in]    f       function pointer
+% @param[in]    a       lower bound
+% @param[in]    b       upper bound
+% @param[in]    epsilon accuracy
     tic;
     if (epsilon<10^-15)
         epsilon=10^-15;
