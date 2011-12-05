@@ -1,22 +1,20 @@
 function [integral , failure] = romberg(f, a, b, epsilon)
-%ROMBERG Summary of this function goes here
-%   Detailed explanation goes here
+%ROMBERG evaluates the integral \int_a^b f(x) dx using the romberg method
+% @param[in] f          function pointer
+% @param[in] a          lower bound
+% @param[in] b          upper bound
+% @param[in] epsilon    accuracy
+% @param[out] integral  evaluated value
+% @param[out] failure   evaluation failure (a posteriori)
 
-
-delta = 1/10^9;
+delta = 1/10^9; % delta value for undefined positions
 iMin = 8; % min index
-d = zeros(iMin, 1); %diagonal values
 iMax = 10; % max index
-finished = 0;
+
+finished = 0; %indicator for end of recursion
 i = 1;
 
-if (isnan(f(a)) || isinf(f(a)))
-   a = a + (b-a)*delta;
-end
-if (isnan(f(b)) || isinf(f(b)))
-   b = b - (b-a)*delta;
-end   
-
+d = zeros(iMin, 1); %diagonal values
 d(1) = (b-a)/2 * (f(a) + f(b));
 while (finished ~= 1)
    i = i+1; % new stepwidth = (b-a)/2^(i-1)
@@ -26,15 +24,11 @@ while (finished ~= 1)
    pos = a;
    for j = 1:(2^(i-1)-1)
        pos = pos + (b-a)/2^(i-1); % position
-       fpos = 2*f(pos);
-%       if (isnan(fpos) || isinf(fpos)) 
-%           fpos = f(pos + 2^(-i-1)) + f(pos - 2^(-i-1));
-%       end
-       trapezsum = trapezsum + fpos;
+       trapezsum = trapezsum + 2*f(pos);
    end
    d(i) = (b-a)/2^i * trapezsum; 
    
-  prev = d(1);
+   prev = d(1);
    % refresh previous last elements vector
    for j = (i-1):(-1):1
      d(j) = d(j+1) + (d(j+1)-d(j))/(2^(2*(i-j))-1);

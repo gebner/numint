@@ -1,11 +1,12 @@
-function [alpha] = legendre_gewichte( n )
-%LEGENDRE_GEWICHTE Summary of this function goes here
-%   Detailed explanation goes here
+function [alpha] = legendre_gewichte(n)
+%LEGENDRE_GEWICHTE evaluates the legendre weigths for gauss integration of degree n
+
 alpha=zeros(n,1);
-c = legendre_roots(n);%koeffizientenvektor
+c = legendre_roots(n);% coefficent vector
 ci = zeros(n-1,1);
 faktor = 0;
 integral = zeros(n+1,0);
+%numeric integration for polynomials
 for i=1:n
     ci = [c(1:i-1)',c(i+1:n)'];
     faktor = prod(c(i)-ci);
