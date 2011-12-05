@@ -4,7 +4,7 @@ function [I,Err]=NumInt(f,a,b,epsilon)
         epsilon=10^-15;
     end
     I=zeros(1,2^-floor(log2(epsilon)));
-    A=zeros(1,4)
+    A=zeros(1,4);
     [I,Err,i,A]=NumIntStep(f,a,b,epsilon,I,1,A);
     size(I)
     I=sum(I);
@@ -82,4 +82,3 @@ function [I,Err,i,A]=NumIntStep(f,a,b,epsilon,I,i,A)
          end
      end
 end 
-             
