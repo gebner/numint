@@ -8,21 +8,25 @@ function [I,Err]=NumInt(f,a,b,epsilon)
     if (epsilon<10^-15)
         epsilon=10^-15;
     end
+    [x,alpha] = legendre_all(13);
+    w = newton_cotes_weights(13);
     A=zeros(2,4); % statistics array
-    [I,Err,A]=NumIntStep(f,a,b,epsilon,A);
+    [I,Err,A]=NumIntStep(f,a,b,epsilon,A,x,alpha, w);
     size(I) % array containing the parts
     I=sum(I); % sum of all parts
     toc;
     A
 end
 
-function [I,Err,A]=NumIntStep(f,a,b,epsilon,A)
+function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
 %    NUMINTSTEP divides the intervall and chooses the algorithm
 % @param[in]    f       function pointer
 % @param[in]    a       lower bound
 % @param[in]    b       upper bound
 % @param[in]    epsilon accuracy
 % @param[in, out] A     statistics array
+% @param[in]    x       matrix of legendre roots
+% @param[in]    alpha   matrix of legendre weights
 % @param[out]    I      array containing the integrals of all intervall parts
 % @param[out]    Err    error (a posteriori)
 
@@ -42,11 +46,11 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A)
              eR=inf;
          end
          
-         [N, eN] = newton_cotes(f, a, b, epsilon); %try newton cotes
+         [N, eN] = newton_cotes(f, a, b, epsilon, w); %try newton cotes
          if isnan(eN) || isinf(eN)
              eN=inf;
          end
-         [G,eG]=gauss(f,a,b,epsilon); %try gauss
+         [G,eG]=gauss(f,a,b,epsilon,x,alpha); %try gauss
          if isnan(eG) || isinf(eG)
              eG=inf;
          end
@@ -58,8 +62,8 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A)
                      Err=eR;
                      A(2,1)=A(2,1)+1;
                  else % romberg not in error ranges -> somethings wrong -> divide
-                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A);
-                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A);
+                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w);
+                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
                      I=[I1,I2];
                      Err=max(E1,E2);
                      A(1,1)=A(1,1)+1;
@@ -71,8 +75,8 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A)
                     Err=eN;
                     A(2,2)=A(2,2)+1;
                  else % newton cotes not in error ranges -> somethings wrong -> divide
-                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A);
-                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A);
+                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w);
+                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
                      I=[I1,I2];
                      Err=max(E1,E2);
                      A(1,2)=A(1,2)+1;
@@ -84,8 +88,8 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A)
                     Err=eG;
                     A(2,3)=A(2,3)+1;
                  else % gauss not in error ranges -> somethings wrong -> divide
-                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A);
-                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A);
+                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w);
+                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
                      I=[I1,I2];
                      Err=max(E1,E2);
                      A(1,3)=A(1,3)+1;
@@ -93,8 +97,8 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A)
                  end
              end
          else % epsilon too small
-             [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A);
-             [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A);
+             [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w);
+             [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
              I=[I1,I2];
              A(1,4)=A(1,4)+1;
              Err=max(E1,E2);

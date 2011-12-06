@@ -1,0 +1,12 @@
+function [ w ] = newton_cotes_weights( dMax )
+%NEWTON_COTES_WEIGHTS Summary of this function goes here
+%   Detailed explanation goes here
+w = zeros(dMax);
+
+for i = 1:dMax
+    w = i * (vander((0:i)/i)' \ (1./fliplr(1:i+1))')'; %solve LGS
+    w = [w(1:end-1) (w(1:end-1) + [w(end) zeros(1, i-1)]) w(end)];
+end
+
+end
+
