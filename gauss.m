@@ -1,38 +1,37 @@
-function [integral, failure ] = gauss(f,a,b, epsilon, x, alpha, iMin, iMax)
+function [integral, failure] = gauss(f,a,b, epsilon, x, alpha, iMin, iMax)
 %INTEGRIEREN_GAUSS Summary of this function goes here
 % @param[in] f          function pointer
 % @param[in] a          lower bound
 % @param[in] b          upper bound
 % @param[in] epsilon    accuracy
-% @param[in] x          matrix of legendre roots
-% @param[in] alpha      matrix of legendre weights
+% @param[in] x          matrix of legendre roots (optional)
+% @param[in] alpha      matrix of legendre weights (optional)
+% @param[in] iMin       minimum index (optional)
+% @param[in] iMax       maximum index (optional)
 % @param[out] integral  evaluated value
 % @param[out] failure   evaluation failure (a posteriori)
 
-if(nargin <= 6)
+if(nargin < 8)
     iMin = 8;
     iMax = 10;
 end
+if (nargin < 6)
+    [x, alpha] = gauss_arrays(iMin, iMax);
+end
 
-finished = false;
-failure = 1;
-integral= 0;
-n = iMin;
+failure = Inf;
+integral= Inf;
+i = iMin;
 
-while (~finished)
+while (failure > epsilon && i <= iMax)
     
-    wert_alt = integral;
-    integral = gauss_quadratur(f,a,b,x,alpha,n);
-    failure = abs((integral - wert_alt)/wert_alt);
+   wert_alt = integral;
+   %evaluate integral
+   integral = gauss_quadratur(f,a,b,x,alpha,i);
+   % get failure estimation
+   failure = abs((integral - wert_alt)/wert_alt);
    
-   n = n+1; 
-   if (n < iMin)
-       finished = 0;
-   elseif(failure < epsilon)
-       finished = 1;
-   elseif (n > iMax)
-       finished = 1;
-   end
+   i = i+1;
 end
 
 end
@@ -42,17 +41,12 @@ function [ wert ] = gauss_quadratur( f, a, b, x, alpha, n)
 % @param[in] f          function pointer
 % @param[in] a          lower bound
 % @param[in] b          upper bound
-% @param[in] x          matrix oflegendre roots
-% @param[in] alpha      matrix oflegendre weights
+% @param[in] x          matrix of legendre roots
+% @param[in] alpha      matrix of legendre weights
 % @param[in] n          degree
 % @param[out] wert      integral value
 
-
-%x = legendre_roots(n);
-%alpha = legendre_gewichte(n);
-
 % evaluate integrals
-
 wert = sum((b-a)/2 *[alpha(n,(end-n+1):end)].*f((b-a)/2*[x(n,(end-n+1):end)]+(a+b)/2));
 
 end
