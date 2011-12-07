@@ -1,8 +1,8 @@
 .PHONY: all clean
 
-all: notes.pdf
+all: NumerischeQuadratur.pdf
 
-notes.pdf: notes.tex
+NumerischeQuadratur.pdf: NumerischeQuadratur.tex
 
 %.pdf: %.tex
 	pdflatex $<
