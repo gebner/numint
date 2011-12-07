@@ -8,19 +8,23 @@ function [I,Err,A]=NumInt(f,a,b,epsilon)
 % @param[out]   Err     error (a posteriori)
 % @param[in, out] A     statistics array
     tic;
+    Gmin = 8; Gmax = 10;
+    Rmin = 6; Rmax = 8;
+    Nmin = 8; Nmax = 12;
+    
     if (epsilon<10^-15)
         epsilon=10^-15;
     end
-    [x,alpha] = legendre_all(13);
-    w = newton_cotes_weights(13);
+    [x,alpha] = legendre_all(Gmin, Gmax);
+    w = newton_cotes_weights(Nmin, Nmax);
     A=zeros(2,4); % statistics array
-    [I,Err,A]=NumIntStep(f,a,b,epsilon,A,x,alpha, w);
+    [I,Err,A]=NumIntStep(f,a,b,epsilon,A,x,alpha, w, Nmin, Nmax, Rmin, Rmax, Gmin, Gmax);
     %size(I) % array containing the parts
     I=sum(I); % sum of all parts
     toc;
 end
 
-function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
+function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w, Nmin, Nmax, Rmin, Rmax, Gmin, Gmax)
 %    NUMINTSTEP divides the intervall and chooses the algorithm
 % @param[in]    f       function pointer
 % @param[in]    a       lower bound
@@ -43,16 +47,16 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
 %     i=i+1;
 %     A(2,4)=A(2,4)+1;
 %     else
-         [R,eR]=romberg(f,a,b,epsilon); %try romberg
+         [R,eR]=romberg(f,a,b,epsilon,Rmin, Rmax); %try romberg
          if (isnan(eR) || isinf(eR))
              eR=inf;
          end
          
-         [N, eN] = newton_cotes(f, a, b, epsilon, w); %try newton cotes
+         [N, eN] = newton_cotes(f, a, b, epsilon, w, Nmin, Nmax); %try newton cotes
          if isnan(eN) || isinf(eN)
              eN=inf;
          end
-         [G,eG]=gauss(f,a,b,epsilon,x,alpha); %try gauss
+         [G,eG]=gauss(f,a,b,epsilon,x,alpha, Gmin, Gmax); %try gauss
          if isnan(eG) || isinf(eG)
              eG=inf;
          end
@@ -64,8 +68,8 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
                      Err=eR;
                      A(2,1)=A(2,1)+1;
                  else % romberg not in error ranges -> somethings wrong -> divide
-                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w);
-                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
+                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w, Nmin, Nmax, Rmin, Rmax, Gmin, Gmax);
+                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w, Nmin, Nmax, Rmin, Rmax, Gmin, Gmax);
                      I=[I1,I2];
                      int1 = sum(I1);
                      int2 = sum(I2);
@@ -80,8 +84,8 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
                     Err=eN;
                     A(2,2)=A(2,2)+1;
                  else % newton cotes not in error ranges -> somethings wrong -> divide
-                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w);
-                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
+                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w, Nmin, Nmax, Rmin, Rmax, Gmin, Gmax);
+                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w, Nmin, Nmax, Rmin, Rmax, Gmin, Gmax);
                      I=[I1,I2];
                      int1 = sum(I1);
                      int2 = sum(I2);
@@ -96,8 +100,8 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
                     Err=eG;
                     A(2,3)=A(2,3)+1;
                  else % gauss not in error ranges -> somethings wrong -> divide
-                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w);
-                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
+                     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w, Nmin, Nmax, Rmin, Rmax, Gmin, Gmax);
+                     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w, Nmin, Nmax, Rmin, Rmax, Gmin, Gmax);
                      I=[I1,I2];
                      int1 = sum(I1);
                      int2 = sum(I2);
@@ -108,8 +112,8 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
                  end
              end
          else % epsilon too small
-             [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w);
-             [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
+             [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w, Nmin, Nmax, Rmin, Rmax, Gmin, Gmax);
+             [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w, Nmin, Nmax, Rmin, Rmax, Gmin, Gmax);
              I=[I1,I2];
              A(1,4)=A(1,4)+1;
              int1 = sum(I1);

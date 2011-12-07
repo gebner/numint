@@ -1,4 +1,4 @@
-function [integral, failure ] = gauss(f,a,b, epsilon, x, alpha )
+function [integral, failure ] = gauss(f,a,b, epsilon, x, alpha, iMin, iMax)
 %INTEGRIEREN_GAUSS Summary of this function goes here
 % @param[in] f          function pointer
 % @param[in] a          lower bound
@@ -9,8 +9,10 @@ function [integral, failure ] = gauss(f,a,b, epsilon, x, alpha )
 % @param[out] integral  evaluated value
 % @param[out] failure   evaluation failure (a posteriori)
 
-iMin = 8;
-iMax = 10;
+if(nargin <= 6)
+    iMin = 8;
+    iMax = 10;
+end
 
 finished = false;
 failure = 1;
@@ -22,7 +24,8 @@ while (~finished)
     wert_alt = integral;
     integral = gauss_quadratur(f,a,b,x,alpha,n);
     failure = abs((integral - wert_alt)/wert_alt);
-    
+   
+   n = n+1; 
    if (n < iMin)
        finished = 0;
    elseif(failure < epsilon)
@@ -30,7 +33,6 @@ while (~finished)
    elseif (n > iMax)
        finished = 1;
    end
-   n = n+1;
 end
 
 end

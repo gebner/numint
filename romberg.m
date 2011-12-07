@@ -1,4 +1,4 @@
-function [integral , failure] = romberg(f, a, b, epsilon)
+function [integral , failure] = romberg(f, a, b, epsilon, iMin, iMax)
 %ROMBERG evaluates the integral \int_a^b f(x) dx using the romberg method
 % @param[in] f          function pointer
 % @param[in] a          lower bound
@@ -7,8 +7,10 @@ function [integral , failure] = romberg(f, a, b, epsilon)
 % @param[out] integral  evaluated value
 % @param[out] failure   evaluation failure (a posteriori)
 
-iMin = 8; % min index
-iMax = 10; % max index
+if(nargin <= 6)
+    iMin = 6; % min index
+    iMax = 8; % max index
+end
 
 finished = 0; %indicator for end of recursion
 i = 1;
