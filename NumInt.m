@@ -1,9 +1,12 @@
-function [I,Err]=NumInt(f,a,b,epsilon)
+function [I,Err,A]=NumInt(f,a,b,epsilon)
 % NUMINT performs numeric integration
 % @param[in]    f       function pointer
 % @param[in]    a       lower bound
 % @param[in]    b       upper bound
 % @param[in]    epsilon accuracy
+% @param[out]   I       Integral value
+% @param[out]   Err     error (a posteriori)
+% @param[in, out] A     statistics array
     tic;
     if (epsilon<10^-15)
         epsilon=10^-15;
@@ -12,10 +15,9 @@ function [I,Err]=NumInt(f,a,b,epsilon)
     w = newton_cotes_weights(13);
     A=zeros(2,4); % statistics array
     [I,Err,A]=NumIntStep(f,a,b,epsilon,A,x,alpha, w);
-    size(I) % array containing the parts
+    %size(I) % array containing the parts
     I=sum(I); % sum of all parts
     toc;
-    A
 end
 
 function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
@@ -65,7 +67,10 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
                      [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w);
                      [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
                      I=[I1,I2];
-                     Err=max(E1,E2);
+                     int1 = sum(I1);
+                     int2 = sum(I2);
+                     Err= (abs(int1*E1) + abs(int2*E2))/abs(int1+int2);
+                     %Err = max(E1, E2);
                      A(1,1)=A(1,1)+1;
 %                     [a,b,1;R,eR,abs(R*eR);N,eN,abs(N*eN);G,eG,abs(G*eG)]
                  end
@@ -78,7 +83,10 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
                      [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w);
                      [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
                      I=[I1,I2];
-                     Err=max(E1,E2);
+                     int1 = sum(I1);
+                     int2 = sum(I2);
+                     Err= (abs(int1*E1) + abs(int2*E2))/abs(int1+int2);
+                     %Err = max(E1, E2);
                      A(1,2)=A(1,2)+1;
 %                     [a,b,2;R,eR,abs(R*eR);N,eN,abs(N*eN);G,eG,abs(G*eG)]
                  end
@@ -91,7 +99,10 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
                      [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w);
                      [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
                      I=[I1,I2];
-                     Err=max(E1,E2);
+                     int1 = sum(I1);
+                     int2 = sum(I2);
+                     Err= (abs(int1*E1) + abs(int2*E2))/abs(int1+int2);
+                     %Err = max(E1, E2);
                      A(1,3)=A(1,3)+1;
 %                     [a,b,3;R,eR,abs(R*eR);N,eN,abs(N*eN);G,eG,abs(G*eG)]
                  end
@@ -101,7 +112,10 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon,A, x, alpha, w)
              [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w);
              I=[I1,I2];
              A(1,4)=A(1,4)+1;
-             Err=max(E1,E2);
+             int1 = sum(I1);
+             int2 = sum(I2);
+             Err= (abs(int1*E1) + abs(int2*E2))/abs(int1+int2);
+             %Err = max(E1, E2);
 %            [a,b,4;R,eR,abs(R*eR);N,eN,abs(N*eN);G,eG,abs(G*eG)]
          end
 %     end

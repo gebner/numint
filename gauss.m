@@ -21,7 +21,7 @@ while (~finished)
     
     wert_alt = integral;
     integral = gauss_quadratur(f,a,b,x,alpha,n);
-    failure = abs((integral-wert_alt)/integral);
+    failure = abs((integral - wert_alt)/wert_alt);
     
    if (n < iMin)
        finished = 0;

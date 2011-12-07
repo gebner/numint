@@ -7,7 +7,6 @@ function [integral , failure] = romberg(f, a, b, epsilon)
 % @param[out] integral  evaluated value
 % @param[out] failure   evaluation failure (a posteriori)
 
-delta = 1/10^9; % delta value for undefined positions
 iMin = 8; % min index
 iMax = 10; % max index
 
@@ -35,7 +34,7 @@ while (finished ~= 1)
    end
    
    % get failure estimation
-   failure = abs((d(1)-prev)/prev);
+   failure = abs((d(1) - prev)/prev);
    if (i < iMin)
        finished = 0;
    elseif(failure < epsilon)

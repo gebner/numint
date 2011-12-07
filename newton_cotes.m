@@ -19,7 +19,7 @@ while (~finished) % degree for fitting
    val = newton_cotes_eval(f, a, b, i, w);
     
     %get failure estimation
-   failure  = 2*abs((val -oldval) / val);  
+   failure  = 2*abs((val - oldval) / oldval);  
    if (i < iMin)
        finished = 0;
    elseif(failure < epsilon)
