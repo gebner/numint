@@ -29,7 +29,7 @@ while (failure > epsilon && i <= iMax)
    %evaluate integral
    integral = gauss_quadratur(f,a,b,x,alpha,i);
    % get failure estimation
-   failure = abs((integral - wert_alt)/wert_alt);
+   failure = abs((integral - wert_alt)/integral);
    
    i = i+1;
 end
