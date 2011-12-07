@@ -1,4 +1,4 @@
-function [ x, alpha ] = legendre_array( iMin, iMax )
+function [ x, alpha ] = gauss_arrays( iMin, iMax )
 %LEGENDRE_ALL derives the roots of the legendre polynomial and the weights
 % @param[in]    iMin        minimal degree of the legendre polynomial
 % @param[in]    iMax        maximal degree of the legendre polynomial
