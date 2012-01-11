@@ -1,4 +1,4 @@
-function [val, failure] = newton_cotes(f, a, b, epsilon, w, iMin, iMax)
+function [val, failure,A] = newton_cotesR(f, a, b, epsilon, iMin, iMax, w)
 % NEWTON_COTES evaluates the integral \int_a^b f(x) dx using the newton cotes method
 % @param[in] f          function pointer
 % @param[in] a          lower bound
@@ -10,23 +10,23 @@ function [val, failure] = newton_cotes(f, a, b, epsilon, w, iMin, iMax)
 % @param[out] integral  evaluated value
 % @param[out] failure   evaluation failure (a posteriori)
 
-if (nargin < 7)
+if (nargin < 6)
     iMin = 8;
     iMax = 12;
 end
-if (nargin == 4)
+if (nargin < 7)
     w = newton_cotes_weights(iMin, iMax);
 end
 
 failure = Inf;
 val = Inf;
-
+A=zeros(2,4);
 i = iMin;
 while (failure > epsilon && i <= iMax) % degree for fitting
    oldval = val;
    %eval integral
-   [val,Err] = newton_cotes_eval(f, a, b, i, w);
-    
+   [val,Err,At] = newton_cotes_eval(f, a, b, i, w);
+    A=A+At;
     %get failure estimation
    failure  = abs((abs(val - oldval)+Err) / val);
    
@@ -35,7 +35,7 @@ end
 
 end
 
-function [I,Err] = newton_cotes_eval(f, a, b, d, w)
+function [I,Err,A] = newton_cotes_eval(f, a, b, d, w)
 % NEWTON_COTES_EVAL Integrates the function f on the interval [a,b] using the Newton-Cotes
 % formula of the specified degree
 % @param[in] f          function pointer
@@ -53,7 +53,7 @@ x = linspace(a,b, length(w1));
 h = x(2) - x(1);% step width
 
 %evaluate integral 
-I=f(x);
+[I,A]=f(x);
 s=size(I);
 if s(1)==2
     Err=abs(I(2,1:end).*I(1,1:end));

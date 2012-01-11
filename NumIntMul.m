@@ -1,4 +1,4 @@
-function [I,Err,A]=NumInt(f,a,b,epsilon,w,x,alpha,Gmin,Gmax,Nmin,Nmax,Rmin,Rmax)
+function [I,Err,A]=NumIntMul(f,a,b,epsilon,w,x,alpha,Gmin,Gmax,Nmin,Nmax,Rmin,Rmax)
 % NUMINT performs numeric integration
 % @param[in]    f       function pointer
 % @param[in]    a       lower bound
@@ -10,10 +10,10 @@ function [I,Err,A]=NumInt(f,a,b,epsilon,w,x,alpha,Gmin,Gmax,Nmin,Nmax,Rmin,Rmax)
 
 %    tic;    
     if nargin<9
-    Gmin = 6; Gmax = 8; %index constants for gauss integral
+    Gmin = 8; Gmax = 10; %index constants for gauss integral
     end
     if nargin<11
-    Nmin = 6; Nmax = 10; %index constants for newton cotes integral
+    Nmin = 8; Nmax = 12; %index constants for newton cotes integral
     end
     if nargin<13
     Rmin = 1; Rmax = 5; %index constants for romberg integral
@@ -56,24 +56,30 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon, x, alpha, w, Nmin, Nmax, Rmin, Rmax
 % @param[out]   A     statistics array
 
  A=zeros(2,4);
- [R,eR]=romberg(f,a,b,epsilon,Rmin, Rmax); %try romberg
+% [R,eR]=romberg(f,a,b,epsilon,Rmin, Rmax); %try romberg
+ R=Inf;
+ eR=Inf;
+ AR=zeros(2,4);
+ A=A+AR;
  if (isnan(eR) || isinf(eR))
      eR=inf;
  end
 
- [N, eN] = newton_cotes(f, a, b, epsilon, w, Nmin, Nmax); %try newton cotes
+ [N, eN, AN] = newton_cotesR(f, a, b, epsilon, Nmin, Nmax, w); %try newton cotes
  if isnan(eN) || isinf(eN)
      eN=inf;
  end
+ A=A+AN;
  
- [G,eG]=gauss(f,a,b,epsilon, x, alpha, Gmin, Gmax); %try gauss
+ [G,eG,AG]=gaussR(f,a,b,epsilon, Gmin, Gmax, x, alpha); %try gauss
  if isnan(eG) || isinf(eG)
      eG=inf;
  end
+ A=A+AG;
  % decide what to do
  if (min([eR,eN,eG])<epsilon || abs(b-a) < epsilon) % is epsilon plausible
      if (~isnan(R) && ~isinf(R) && eR<=eN && eR<=eG) % romberg integration worked best
-         if (((isnan(N)||abs(R-N)<=abs(N*eN)) && (isnan(G)||abs(R-G)<=abs(G*eG))) || abs(b-a) < epsilon) % romberg result is in error ranges
+         if (((isnan(N)||abs(R-N)<=2*abs(N*eN)) && (isnan(G)||abs(R-G)<=2*abs(G*eG))) || abs(b-a) < epsilon) % romberg result is in error ranges
              I=R;
              Err=eR;
              A(2,1)=A(2,1)+1; % statistics array
@@ -88,7 +94,7 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon, x, alpha, w, Nmin, Nmax, Rmin, Rmax
              A(1,1)=A(1,1)+1;
          end
      elseif (~isnan(N) && ~isinf(N) && eN<=eG && eN<=eR) % newton cotes worked best
-         if (((isnan(G)||abs(N-G)<=abs(G*eG)) && (isnan(R)||abs(R-N)<=abs(R*eR))) || abs(b-a) < epsilon) % newton cotes result is in error ranges
+         if (((isnan(G)||abs(N-G)<=2*abs(G*eG)) && (isnan(R)||abs(R-N)<=2*abs(R*eR))) || abs(b-a) < epsilon) % newton cotes result is in error ranges
             I=N;
             Err=eN;
             A(2,2)=A(2,2)+1; % statistics array
@@ -103,7 +109,7 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon, x, alpha, w, Nmin, Nmax, Rmin, Rmax
              A(1,2)=A(1,2)+1;
          end
      elseif (~isnan(G) && ~isinf(G)) % gauss worked best
-        if (((isnan(R)||abs(R-G)<=abs(R*eR)) && (isnan(N)||abs(N-G)<=abs(N*eN))) || abs(b-a)< epsilon) % gauss result is in error ranges
+        if (((isnan(R)||abs(R-G)<=2*abs(R*eR)) && (isnan(N)||abs(N-G)<=2*abs(N*eN))) || abs(b-a)< epsilon) % gauss result is in error ranges
             I=G;
             Err=eG;
             A(2,3)=A(2,3)+1;% statistics array
