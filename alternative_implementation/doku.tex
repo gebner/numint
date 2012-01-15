@@ -1,0 +1,69 @@
+\documentclass{scrartcl}
+
+%packages
+\usepackage[latin9]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[fleqn]{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{parskip}
+
+\usepackage{listings}
+\lstset{language=Octave, basicstyle=\footnotesize\tt, tabsize=8,
+  breaklines=true, caption=\texttt\lstname, captionpos=b}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+{<5><6><7><8><9><10><10.95><12><14.4><17.28><20.74><24.88>cmttb10}{}
+
+\begin{document}
+
+\section{Alternative Implementierung}
+
+Dieser Abschnitt behandelt eine grobe, alternative Implementierung der
+numerischen Integration von Funktionen $f: \mathbb R^n \to \mathbb R$
+f"ur $n < \omega$ "uber einen Hyperquader $\prod_{i < n} [a_i, b_i]
+\subseteq \mathbb R^n$, $a_i, b_i \in \mathbb R$.
+. Die Idee ist den Integrationsbereich als Teilmenge des $\mathbb R^n$
+bei Bedarf in kleinere Hyperquader zu teilen, anstatt sofort den Satz von Fubini
+anzuwenden und bei der Integration der eindimensionalen Funktionen jeweils
+bei Bedarf $\mathbb R$ zu teilen, in der Hoffnung so problematische
+Bereiche besser isolieren zu k"onnen.
+
+Das inh"arente Problem der Integration im Mehrdimensionalen des
+exponentiell mit der Dimension wachsenden Aufwands konnte nat"urlich auch
+mit dieser Implementierung nicht beseitigt werden.
+
+Die Integration erfolgt folgender folgenderma"sen:
+unterscheidet sich der relative Abstand der Werte der Integration mittels eines
+Hyperw"urfelgitters mit $6^n$ und
+$8^n$ St"utzstellen, dh. $6$ bzw. $8$ St"utzstellen in jeder Dimension,
+wobei entlang jeder Dimension nach Newton-Cotes gewichtet aufsummiert wird
+um mehr als $12 - t$ Stellen, wobei $t$ die Anzahl der bisher erfolgten
+Teilungen des Integrationsbereichs ist, unterscheidet wird erneut geteilt,
+ansonsten der Wert der Integration mit $8^n$ Stellen zur"uckgegeben.
+Die Genauigkeitsanforderung nimmt also mit der Anzahl der Teilungen ab,
+um eine Termination in vertretbarer Zeit auch bei unangenehmen Funktionen
+zu erzwingen.
+
+Die Schranke $12 - t$ wurde experimentell als im Allgemeinen vern"uftig
+verifiziert, kann aber nat"urlich f"ur spezielle Klassen von Funktionen
+geeignet verbessert werden. Genauso hat sich gezeigt, dass die Rechenzeit
+bei Funktionen deren Ordnung den Exaktheitsgrad der Newton-Cotes-Integration
+"ubersteigen, verglichen mit solchen die es nicht tun, stark zunimmt.
+Ist also zu erwarten, dass vorwiegend Funktionen hoher Ordnungen
+integriert werden sollen, ist eine geeignete Erh"ohung der Werte $6$ und
+$8$ anzuraten.
+
+Es sei weiters bemerkt, dass die Integration integrierbarer Funktionen
+mit Singularit"aten scheitert.
+
+\lstinputlisting{integriereQuader.m}
+
+Die folgende Funktion ist lediglich eine Verpackung der Funktion
+\lstinline|integriereQuader.m|, sodass diese nicht jedesmal explizit
+mit $0$ Teilungen gestartet werden muss.
+
+\lstinputlisting{integriereVerpackung.m}
+
+\lstinputlisting{werteAusUndSummiere.m}
+
+\end{document}
