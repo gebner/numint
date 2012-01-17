@@ -1,0 +1,101 @@
+\documentclass[10pt, a4paper, titlepage, fleqn]{article}
+
+%packages
+\usepackage[latin9]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[a4paper,
+left=3cm, right=1.5cm,
+top=2.5cm, bottom=2.5cm]{geometry}
+
+\usepackage{color}
+\definecolor{gray}{gray}{0.50}
+\usepackage{listings}
+\lstset{language=Octave, basicstyle=\small, tabsize=8,frame = single,commentstyle = \color{gray},
+  breaklines=true, caption=\texttt\lstname, captionpos=b}
+\DeclareFontShape{OT1}{cmtt}{bx}{n}
+{<5><6><7><8><9><10><10.95><12><14.4><17.28><20.74><24.88>cmttb10}{}
+
+%\linespread{1.5}
+\parindent 0pt
+
+\pagestyle{headings}
+
+\begin{document}
+
+\begin{titlepage}
+\title{4.Projekt für Numerische Mathematik UE \\
+Numerische Integration über mehrdimensionale Gebiete}
+\author{Thomas Baumhauer, Judith Braunsteiner,\\
+Gabriel Ebner, Johannes Hafner,\\
+Clemens Müllner, Christina Satzinger}
+\date{\today}
+\maketitle
+\end{titlepage}
+
+\section{Fehlerabschätzungen bei mehrdimensionaler Integration}
+
+\section{Programmaufbau}
+
+Nach dem Satz von Fubini gilt für Integrationsgebiete $I = \times_{i = 1}^n [a_i,b_i]$:
+
+\begin{align*}
+\int_{[a_0, b_0]\times I} f(x_0, x_1, \dots, x_n) d(x_0, x_1, \dots, x_n) = 
+\int_{a_0}^{b_0} \underbrace{\int_I f(x_0, x_1, \dots, x_n) d(x_1, \dots, x_n)}_{\overline{(f)(x_0)}} dx_0
+\end{align*}
+
+So lässt sich die Integration eines mehrdimensionalen Integrals mithilfe einer Funktion \textit{dimDown} schrittweise auf die Auswertung von Integralen niedrigerer Dimension zurückführen.
+
+\begin{align*}
+f: \mathbb{R}^{n+1} \rightarrow \mathbb{R}
+\end{align*}
+\begin{align*}
+dimDown(f):& \mathbb{R} \rightarrow \mathbb{R}\\
+           & x \mapsto \int_I f(x, x_1, \dots, x_n) d(x_1, \dots, x_n)
+\end{align*}
+
+Somit reicht es grundsätzlich skalare Funktionen integrieren zu können.\\
+
+Der Fehler ist bei der Integration von $dimDown(f)$ durch Integration der Fehlerabschätzungen bei den einzelnen Integralen an den Auswertungsstellen berechenbar.
+
+Dies wird in unserer Implementierung im äußersten Integrator miterledigt, wobei gleiche Ordnung,Gewichte und Auswertestellen für Funktion und Fehler verwendet werden.\\
+
+Um bei Verwendung unserer optimierten Funktion $NumInt$ als Integrator auch die Statistiken für die Wahl des besten Verfahrens mitführen und aufaddieren zu können, wird unsere Funktion zu Beginn des Aufrufes um ein zusätzliches Array $A$ erweitert.
+Im skalaren Fall wird dieses einfach als $0$-Array mitgeführt.
+
+\subsection{Grundstruktur}
+
+Um im folgenden die erwähnte Erweiterung um das Statistikarray durchzuführen verwenden wir im folgenden die Funktion $mapWithStats$.
+
+\lstinputlisting{mapWithStats.m}
+
+Unsere allgemeinere Funktion $mulDimInt$ arbeitet nun mit einem allgemeinen eindimensionalen Integrator $Integrator$ (wie etwa $NumInt$) und erwartet als Argumente außerdem eine (mehrdimensionale) Funktion $f$, Arrays $a$ und $b$ mit unteren und oberen Integralgrenzen und eine Genauigkeitsvorgabe $epsilon$.
+
+\lstinputlisting{mulDimInt.m}
+
+\subsection{Integratoren}
+
+Ähnlich wir im eindimensionalen Fall haben wir die Verfahren $newton\_cotes$ und $gauss$ implementiert, die auf weitere unveränderten Funktionen aus dem 3.Projekt zurückgreifen.
+
+Es wurden hier Änderungen durchgeführt um die Fehler und Statistiken hochziehen zu können.
+
+\lstinputlisting{newton_cotes.m}
+
+\lstinputlisting{gauss.m}
+
+Die Funktion $NumInt$ ist wiederum unser bevorzugter Integrator, der nun aus Effizienzgründen kein Romberg-Verfahren mehr verwendet.
+
+\lstinputlisting{NumInt.m}
+
+\subsection{Optimierung}
+
+Speziell für den Integrator $NumInt$ haben wir die Effizienz der Berechnung von $mulDimInt$ in der Funktion $mulDimIntOpt$ durch die Vorberechnung der Arrays für Newton-Cotes und Gauss-Integration gesteigert.
+
+\lstinputlisting{mulDimIntOpt.m}
+
+\section{Beispiele}
+
+\end{document}
