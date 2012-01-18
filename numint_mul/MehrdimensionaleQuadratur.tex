@@ -6,6 +6,7 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{parskip}
+\usepackage{spverbatim}
 
 \usepackage{color}
 \definecolor{gray}{gray}{0.50}
@@ -112,6 +113,30 @@ Speziell für den Integrator $NumInt$ haben wir die Effizienz der Berechnung von 
 \lstinputlisting{mulDimIntOpt.m}
 
 \section{Beispiele}
+
+\subsection{Laufzeit versus Dimension}
+
+Hier haben wir eine lineare Funktion (die Summe der Koordinaten) auf den Einheitshyperquader integriert.
+
+Bei der mehrdimensionalen Gauss-Quadratur beobachten wir, wie erwartet, einen
+exponentiellen Laufzeitansteig, etwa mit Faktor \(10\):
+
+\begin{spverbatim}
+octave:24> for i = 1:5, tic; mulDimIntGauss(@(x) sum(x), zeros(i,1), ones(i,1), 1e-4); toc; end
+Elapsed time is 0.01991 seconds.
+Elapsed time is 0.0233 seconds.
+Elapsed time is 0.1175 seconds.
+Elapsed time is 1.05 seconds.
+Elapsed time is 10.15 seconds.
+\end{spverbatim}
+
+Mit dem adaptiven Integrator beobachten wir einen deutlichen größeren Faktor:
+
+\begin{spverbatim}
+octave:25> for i = 1:2, tic; mulDimIntOpt(@(x) sum(x), zeros(i,1), ones(i,1), 1e-4); toc; end
+Elapsed time is 0.08288 seconds.
+Elapsed time is 1.976 seconds.
+\end{spverbatim}
 
 \newpage
 
