@@ -31,10 +31,10 @@ Clemens Müllner, Christina Satzinger}
 
 \section{Fehlerabschätzungen bei mehrdimensionaler Integration}
 
-Um eine Fehlerabschätzung für die Mehrdimensionalen Quadratur zu erhalten geht man
-eben so wie das Verfahren mit Hilfe von Fubini vor.
+Um eine Fehlerabschätzung für die mehrdimensionale Quadratur zu erhalten, geht man
+eben so wie bei dem Verfahren mit Hilfe von Fubini vor.
 
-Geht man nun von einer $d$ dimensionalen Funktion aus, mit eindimensionalen Quadraturen mit Anzahl der Stützstellen $n_d$ so
+Hat man nun eine $d$ dimensionale Funktion, mit eindimensionalen Quadraturen, die jeweils $n_d$ Stützstellen haben, so
 kann man folgendes beobachten:
 
 \begin{eqnarray*}
@@ -50,13 +50,14 @@ also den der eindimensionalen Quadratur.
 o(k))g_{d-1}^i + o(d-1)  dx_1...dx_{d-2}\\
 =...=\sum_{i_1=1}^{n_1}...\sum_{i_d=1}^{n_d}f(x_1^{i_1},...,x^{i_d}_d)\prod_{k=1}^d g_k^{i_k} + \sum_{k=1}^d o(k)\\
 \end{eqnarray*}
+
 Die Gewichte einer Quadratur summieren sich auf eins, wodurch sie bei den Fehlertermen wegfallen
-(Vorrausgesetzt natürlich $g_k^i\le 1 \forall i, k$).
-Die erste Summe ist genau das, was das Mehrdimensionalequatraturverfahren berrechnet. Die zweite Summe verbleibt als neuer Fehler.
+(vorrausgesetzt natürlich $g_k^i\le 1 \forall i, k$).
+Die erste Summe ist genau das, was das mehrdimensionale Quadraturverfahren berechnet. Die zweite Summe verbleibt als neuer Fehler.
 
 Man sieht also, dass sich die Fehler im schlimmsten Fall aufsummieren. Wählt man für alle Dimensionen das selbe Verfahren selber Ordnung,
-so ergibt sich also ein Fehler der Ordnung $d \cdot o$ wobei $o$ den Fehler der Eindimensionalen Quadratur bezeichnet, der im Allgemeinen von
-der Intervalllänge, der Anzahl der Stützstellen n und höheren Ableitungen der Funktion abhängt. 
+so ergibt sich also ein Fehler der Ordnung $d \cdot o$ wobei $o$ den Fehler der eindimensionalen Quadratur bezeichnet, der im Allgemeinen von
+der Intervalllänge, der Anzahl der Stützstellen, und höheren Ableitungen der Funktion abhängt. 
 
 \section{Programmaufbau}
 
@@ -81,7 +82,7 @@ Somit reicht es grundsätzlich skalare Funktionen integrieren zu können.\\
 
 Der Fehler ist bei der Integration von $dimDown(f)$ durch Integration der Fehlerabschätzungen bei den einzelnen Integralen an den Auswertungsstellen berechenbar.
 
-Dies wird in unserer Implementierung im äußersten Integrator miterledigt, wobei gleiche Ordnung,Gewichte und Auswertestellen für Funktion und Fehler verwendet werden.\\
+Dies wird in unserer Implementierung im äußersten Integrator miterledigt, wobei gleiche Ordnung, Gewichte und Auswertestellen für Funktion und Fehler verwendet werden.\\
 
 Um bei Verwendung unserer optimierten Funktion $NumInt$ als Integrator auch die Statistiken für die Wahl des besten Verfahrens mitführen und aufaddieren zu können, wird unsere Funktion zu Beginn des Aufrufes um ein zusätzliches Array $A$ erweitert.
 Im skalaren Fall wird dieses einfach als $0$-Array mitgeführt.
@@ -120,7 +121,7 @@ Speziell für den Integrator $NumInt$ haben wir die Effizienz der Berechnung von 
 
 \subsection{Laufzeit versus Dimension}
 
-Hier haben wir eine lineare Funktion (die Summe der Koordinaten) auf den
+Hier haben wir eine lineare Funktion (die Summe der Koordinaten) auf dem
 Einheitshyperquader integriert.
 
 Bei der mehrdimensionalen Gauss-Quadratur beobachten wir, wie erwartet, einen
