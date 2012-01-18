@@ -6,6 +6,7 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{parskip}
+\usepackage{spverbatim}
 
 \usepackage{color}
 \definecolor{gray}{gray}{0.50}
@@ -29,6 +30,33 @@ Clemens Müllner, Christina Satzinger}
 \end{titlepage}
 
 \section{Fehlerabschätzungen bei mehrdimensionaler Integration}
+
+Um eine Fehlerabschätzung für die Mehrdimensionalen Quadratur zu erhalten geht man
+eben so wie das Verfahren mit Hilfe von Fubini vor.
+
+Geht man nun von einer $d$ dimensionalen Funktion aus, mit eindimensionalen Quadraturen mit Anzahl der Stützstellen $n_d$ so
+kann man folgendes beobachten:
+
+\begin{eqnarray*}
+\int_{\times [a_k,b_k]} f(x_1,...,x_d) d(x_1,...,x_d)=\int_{a_1}^{b^1} ... \int_{a_d}^{b^d} f(x_1,...,x_d) dx_d...dx_1\\
+=\int_{a_1}^{b^1} ... \int_{a_{d-1}}^{b^{d-1}} \sum_{i=1}^{n_d} f(x_1,...,x_{d-1},x^i_d)g_d^i + o(d)  dx_1...dx_{d-1}\\
+\end{eqnarray*}
+
+Wobei $o(k)$ den Fehlerterm  $\int_{a_k}^{b^k} f(x_1,...,x_d) dx_k - \sum_{i=1}^{n_k} f(x_1,...,,x^i_k,...x_k)g_k^i$ bezeichnet,
+also den der eindimensionalen Quadratur.
+
+\begin{eqnarray*}
+=\int_{a_1}^{b^1} ... \int_{a_{d-1}}^{b^{d-1}} \sum_{j=1}^{n_{d-1}} (\sum_{i=1}^{n_d} f(x_1,..., x_{d-2},x^j_{d-1},x^i_d)g_d^i +
+o(k))g_{d-1}^i + o(d-1)  dx_1...dx_{d-2}\\
+=...=\sum_{i_1=1}^{n_1}...\sum_{i_d=1}^{n_d}f(x_1^{i_1},...,x^{i_d}_d)\prod_{k=1}^d g_k^{i_k} + \sum_{k=1}^d o(k)\\
+\end{eqnarray*}
+Die Gewichte einer Quadratur summieren sich auf eins, wodurch sie bei den Fehlertermen wegfallen
+(Vorrausgesetzt natürlich $g_k^i\le 1 \forall i, k$).
+Die erste Summe ist genau das, was das Mehrdimensionalequatraturverfahren berrechnet. Die zweite Summe verbleibt als neuer Fehler.
+
+Man sieht also, dass sich die Fehler im schlimmsten Fall aufsummieren. Wählt man für alle Dimensionen das selbe Verfahren selber Ordnung,
+so ergibt sich also ein Fehler der Ordnung $d \cdot o$ wobei $o$ den Fehler der Eindimensionalen Quadratur bezeichnet, der im Allgemeinen von
+der Intervalllänge, der Anzahl der Stützstellen n und höheren Ableitungen der Funktion abhängt. 
 
 \section{Programmaufbau}
 
@@ -89,5 +117,83 @@ Speziell für den Integrator $NumInt$ haben wir die Effizienz der Berechnung von 
 \lstinputlisting{mulDimIntOpt.m}
 
 \section{Beispiele}
+
+\subsection{Laufzeit versus Dimension}
+
+Hier haben wir eine lineare Funktion (die Summe der Koordinaten) auf den
+Einheitshyperquader integriert.
+
+Bei der mehrdimensionalen Gauss-Quadratur beobachten wir, wie erwartet, einen
+exponentiellen Laufzeitansteig, etwa mit Faktor \(10\):
+
+\begin{spverbatim}
+octave:24> for i = 1:5, tic; mulDimIntGauss(@(x) sum(x), zeros(i,1), ones(i,1), 1e-4); toc; end
+Elapsed time is 0.01991 seconds.
+Elapsed time is 0.0233 seconds.
+Elapsed time is 0.1175 seconds.
+Elapsed time is 1.05 seconds.
+Elapsed time is 10.15 seconds.
+\end{spverbatim}
+
+Mit dem adaptiven Integrator beobachten wir einen deutlichen größeren Faktor:
+
+\begin{spverbatim}
+octave:25> for i = 1:2, tic; mulDimIntOpt(@(x) sum(x), zeros(i,1), ones(i,1), 1e-4); toc; end
+Elapsed time is 0.08288 seconds.
+Elapsed time is 1.976 seconds.
+\end{spverbatim}
+
+\newpage
+
+\section{Alternative Implementierung}
+
+Dieser Abschnitt behandelt eine grobe, alternative Implementierung der
+numerischen Integration von Funktionen $f: \mathbb R^n \to \mathbb R$
+f"ur $n < \omega$ "uber einen Hyperquader $\prod_{i < n} [a_i, b_i]
+\subseteq \mathbb R^n$, $a_i, b_i \in \mathbb R$.
+. Die Idee ist den Integrationsbereich als Teilmenge des $\mathbb R^n$
+bei Bedarf in kleinere Hyperquader zu teilen, anstatt sofort den Satz von Fubini
+anzuwenden und bei der Integration der eindimensionalen Funktionen jeweils
+bei Bedarf $\mathbb R$ zu teilen, in der Hoffnung so problematische
+Bereiche besser isolieren zu k"onnen.
+
+Das inh"arente Problem der Integration im Mehrdimensionalen des
+exponentiell mit der Dimension wachsenden Aufwands konnte nat"urlich auch
+mit dieser Implementierung nicht beseitigt werden.
+
+Die Integration erfolgt folgender folgenderma"sen:
+unterscheidet sich der relative Abstand der Werte der Integration mittels eines
+Hyperw"urfelgitters mit $6^n$ und
+$8^n$ St"utzstellen, dh. $6$ bzw. $8$ St"utzstellen in jeder Dimension,
+wobei entlang jeder Dimension nach Newton-Cotes gewichtet aufsummiert wird
+um mehr als $12 - t$ Stellen, wobei $t$ die Anzahl der bisher erfolgten
+Teilungen des Integrationsbereichs ist, unterscheidet wird erneut geteilt,
+ansonsten der Wert der Integration mit $8^n$ Stellen zur"uckgegeben.
+Die Genauigkeitsanforderung nimmt also mit der Anzahl der Teilungen ab,
+um eine Termination in vertretbarer Zeit auch bei unangenehmen Funktionen
+zu erzwingen.
+
+Die Schranke $12 - t$ wurde experimentell als im Allgemeinen vern"uftig
+verifiziert, kann aber nat"urlich f"ur spezielle Klassen von Funktionen
+geeignet verbessert werden. Genauso hat sich gezeigt, dass die Rechenzeit
+bei Funktionen deren Ordnung den Exaktheitsgrad der Newton-Cotes-Integration
+"ubersteigen, verglichen mit solchen die es nicht tun, stark zunimmt.
+Ist also zu erwarten, dass vorwiegend Funktionen hoher Ordnungen
+integriert werden sollen, ist eine geeignete Erh"ohung der Werte $6$ und
+$8$ anzuraten.
+
+Es sei weiters bemerkt, dass die Integration integrierbarer Funktionen
+mit Singularit"aten scheitert.
+
+\lstinputlisting{alternative_implementation/integriereQuader.m}
+
+Die folgende Funktion ist lediglich eine Verpackung der Funktion
+\lstinline|integriereQuader.m|, sodass diese nicht jedesmal explizit
+mit $0$ Teilungen gestartet werden muss.
+
+\lstinputlisting{alternative_implementation/integriereVerpackung.m}
+
+\lstinputlisting{alternative_implementation/werteAusUndSummiere.m}
+
 
 \end{document}

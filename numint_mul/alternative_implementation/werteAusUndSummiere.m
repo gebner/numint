@@ -1,7 +1,7 @@
 function[summe] = werteAusUndSummiere(f, grenzen, koordinaten, stellenzahl)
-%INTEGRIEREQUADER Integriere ueber einen Hyperquader mittels Fubini und
-%                 Newton-Cotes-Formeln; Reduziere dabei die Dimension des
-%                 Problem rekursiv.
+%INTEGRIEREQUADER Integriere ueber einen Hyperquader mittels Fubini
+%                 und Newton-Cotes-Formeln; Reduziere dabei die
+%                 Dimension des Problem rekursiv.
 %
 % @param[in] f           Die zu integrierende Funktion
 % @param[in] grenzen     Die Integrationsgrenzen, siehe integriereQuader.m

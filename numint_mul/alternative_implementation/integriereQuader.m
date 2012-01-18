@@ -3,8 +3,9 @@ function[summe] = integriereQuader(f, grenzen, teilungen)
 %
 % @param[in] f          Die zu integrierende Funktion
 % @param[in] grenzen    Die Grenzen des Hyperquaders:
-%                       Im Feld (k, 1) ist die untere, im Feld (k,2) die
-%                       obere Grenze in der k-ten Dimension gegeben;
+%                       Im Feld (k, 1) ist die untere, im Feld (k,2)
+%                       die obere Grenze in der k-ten Dimension
+%                       gegeben;
 %                       die Dimension wird an der Laenge von grenzen
 %                       bestimmt.
 % @param[in] teilungen  die Anzahl der bisher erfolgten Teilungen des
