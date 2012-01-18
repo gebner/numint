@@ -6,7 +6,6 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{parskip}
-\usepackage{spverbatim}
 
 \usepackage{color}
 \definecolor{gray}{gray}{0.50}
@@ -127,30 +126,33 @@ Einheitshyperquader integriert.
 Bei der mehrdimensionalen Gauss-Quadratur beobachten wir, wie erwartet, einen
 exponentiellen Laufzeitansteig, etwa mit Faktor \(10\):
 
-\begin{spverbatim}
-octave:24> for i = 1:5, tic; mulDimIntGauss(@(x) sum(x), zeros(i,1), ones(i,1), 1e-4); toc; end
+\begin{verbatim}
+octave:24> for i = 1:5, tic; mulDimIntGauss(@(x) sum(x),
+  zeros(i,1), ones(i,1), 1e-4); toc; end
 Elapsed time is 0.01991 seconds.
 Elapsed time is 0.0233 seconds.
 Elapsed time is 0.1175 seconds.
 Elapsed time is 1.05 seconds.
 Elapsed time is 10.15 seconds.
-\end{spverbatim}
+\end{verbatim}
 
 Mit dem adaptiven Integrator beobachten wir einen deutlichen größeren Faktor:
 
-\begin{spverbatim}
-octave:25> for i = 1:2, tic; mulDimIntOpt(@(x) sum(x), zeros(i,1), ones(i,1), 1e-4); toc; end
+\begin{verbatim}
+octave:25> for i = 1:2, tic; mulDimIntOpt(@(x) sum(x),
+  zeros(i,1), ones(i,1), 1e-4); toc; end
 Elapsed time is 0.08288 seconds.
 Elapsed time is 1.976 seconds.
-\end{spverbatim}
+\end{verbatim}
 
 \subsection{Laufzeit versus Toleranz}
 
 Hier sehen wir bei der Gauss-Quadratur einen moderaten Anstieg der Laufzeit mit
 kleiner werdender Toleranz:
 
-\begin{spverbatim}
-octave:17> for i = 4:15, tic; mulDimIntGauss(@(x) exp(x(1)*x(2)*x(3)), [0 0 0], [1 1 1], 10^-i); toc; end
+\begin{verbatim}
+octave:17> for i = 4:15, tic; mulDimIntGauss(@(x) exp(x(1)*x(2)*x(3)),
+  [0 0 0], [1 1 1], 10^-i); toc; end
 Elapsed time is 0.1376 seconds.
 Elapsed time is 0.1187 seconds.
 Elapsed time is 0.1181 seconds.
@@ -163,19 +165,20 @@ Elapsed time is 0.2748 seconds.
 Elapsed time is 0.2912 seconds.
 Elapsed time is 0.3164 seconds.
 Elapsed time is 0.3292 seconds.
-\end{spverbatim}
+\end{verbatim}
 
 Beim adaptiven Integrator beobachten wir einen schnelleren Anstieg:
 
-\begin{spverbatim}
-octave:19> for i = 4:9, tic; mulDimIntOpt(@(x) exp(x(1)*x(2)*x(3)), [0 0 0], [1 1 1], 10^-i); toc; end
+\begin{verbatim}
+octave:19> for i = 4:9, tic; mulDimIntOpt(@(x) exp(x(1)*x(2)*x(3)),
+  [0 0 0], [1 1 1], 10^-i); toc; end
 Elapsed time is 0.9982 seconds.
 Elapsed time is 1.398 seconds.
 Elapsed time is 2.942 seconds.
 Elapsed time is 3.654 seconds.
 Elapsed time is 4.221 seconds.
 Elapsed time is 7.038 seconds.
-\end{spverbatim}
+\end{verbatim}
 
 \newpage
 
