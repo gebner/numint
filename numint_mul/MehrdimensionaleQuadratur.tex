@@ -30,6 +30,29 @@ Clemens Müllner, Christina Satzinger}
 
 \section{Fehlerabschätzungen bei mehrdimensionaler Integration}
 
+Um eine Fehlerabsch"atzung f"ur die Mehrdimensionalen Quatratur zu erhalten geht man
+eben so wie das Verfahren mit Hilfe von Fubini vor.\\
+
+Geht man nun von einer $d$ dimensionalen Funktion aus, mit eindimensionalen Quatraturen mit Anzahl der St"utzstellen $n_d$ so
+kann man folgendes beobachten:\
+
+%\begin{eqnarray*}
+$\int_{\times [a_k,b_k]} f(x_1,...,x_d) d(x_1,...,x_d)=\int_{a_1}^{b^1} ... \int_{a_d}^{b^d} f(x_1,...,x_d) dx_d...dx_1$\\
+$=\int_{a_1}^{b^1} ... \int_{a_{d-1}}^{b^{d-1}} \sum_{i=1}^{n_d} f(x_1,...,x_{d-1},x^i_d)g_d^i + o(d)  dx_1...dx_{d-1}$\\
+Wobei $o(k)$ den Fehlerterm  $\int_{a_k}^{b^k} f(x_1,...,x_d) dx_k - \sum_{i=1}^{n_k} f(x_1,...,,x^i_k,...x_k)g_k^i$ bezeichnet,
+also den der eindimensionalen Quatratur.\\
+$=\int_{a_1}^{b^1} ... \int_{a_{d-1}}^{b^{d-1}} \sum_{j=1}^{n_{d-1}} (\sum_{i=1}^{n_d} f(x_1,..., x_{d-2},x^j_{d-1},x^i_d)g_d^i +
+o(k))g_{d-1}^i + o(d-1)  dx_1...dx_{d-2}$\\
+$=...=\sum_{i_1=1}^{n_1}...\sum_{i_d=1}^{n_d}f(x_1^{i_1},...,x^{i_d}_d)\prod_{k=1}^d g_k^{i_k} + \sum_{k=1}^d o(k)$\\
+Die Gewichte einer Quatratur summieren sich auf eins, wodurch sie bei den Fehlertermen wegfallen
+(Vorrausgesetzt nat"urlich $g_k^i\le 1 \forall i, k$).
+Die erste Summe, ist genau das was, das Mehrdimensionalequatraturverfahren berrechnet. Die zweite Summe Verbleibt als neuer Fehler.\\
+%\end{eqnarray*}
+
+Man sieht also, dass sich die Fehler im schlimmsten Fall aufsummieren. W"ahlt man f"ur alle Dimensionen das selbe Verfahren selber Ordnung,
+so ergibt sich also ein Fehler der Ordnung $d*o$ wobei $o$ den Fehler der Eindimensionalen Quatratur bezeichnet, der im Allgemeinen von
+der Intervalll"ange, der Anzahl der St"utzstellen n und h"oheren Ableitungen der Funktion abh"angt. 
+
 \section{Programmaufbau}
 
 Nach dem Satz von Fubini gilt für Integrationsgebiete $I = \times_{i = 1}^n [a_i,b_i]$:
