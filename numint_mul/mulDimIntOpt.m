@@ -21,9 +21,9 @@ if (nargin <5)
     A = zeros(2,4);
 end
 if (nargin<12)
-    Gmin = 4;Gmax = 6;
+    Gmin = 2;Gmax = 4;
     [p,alpha] = gauss_arrays(Gmin, Gmax+1);
-    Nmin = 4; Nmax = 8;
+    Nmin = 2; Nmax = 6;
     w = newton_cotes_weights(Nmin, Nmax);
 end
 s=length(a);

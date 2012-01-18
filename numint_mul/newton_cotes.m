@@ -68,7 +68,7 @@ s=size(I);
 
 if s(1)==2
     Err=abs(I(2,:).*I(1,:));
-    Err=h*w1*Err';
+    Err=h*abs(w1)*Err';
 else
     Err=0;
 end

@@ -61,7 +61,7 @@ function [ I , Err,A] = gauss_quadratur( f, a, b, x, alpha, n)
 s=size(I);
 if s(1)==2
     Err=abs(I(2,1:end).*I(1,1:end));
-    Err=abs((b-a)/2 *alpha(n,(end-n+1):end))*Err';
+    Err=abs((b-a)/2 *abs(alpha(n,(end-n+1):end)))*Err';
 else
     Err=0;
 end

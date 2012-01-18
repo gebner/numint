@@ -21,10 +21,10 @@ function [I,Err,A]=NumInt(f,a,b,epsilon,A,Gmin,Gmax,Nmin,Nmax,w,x,alpha)
     end
     %set boundries
     if nargin<7
-      Gmin = 6; Gmax = 8; %index constants for gauss integral
+      Gmin = 2; Gmax = 4; %index constants for gauss integral
     end
     if nargin<9
-      Nmin = 6; Nmax = 10; %index constants for newton cotes integral
+      Nmin = 2; Nmax = 6; %index constants for newton cotes integral
     end
     %eval weigths
     if nargin<12
@@ -72,10 +72,14 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon, A, x, alpha, w, Nmin, Nmax, Gmin, G
  if ((min([eN,eG])<epsilon && ((~isnan(G) && ~isinf(G))||(~isnan(N) && ~isinf(N))))|| abs(b-a) < epsilon) % is epsilon plausible
      if (~isnan(N) && ~isinf(N) && (eN<=eG || (isnan(eG) || isinf(eG)))) % newton cotes worked best
          if ((((isnan(G)||abs(N-G)<=abs(G*eG)))) || abs(b-a) < epsilon) % newton cotes result is in error ranges
-            I=N;
-            Err=eN;
-            A(2,2)=A(2,2)+1; % statistics array
-         else % newton cotes not in error ranges -> somethings wrong -> divide
+             I=N;
+             Err=eN;
+             A(2,2)=A(2,2)+1; % statistics array
+         elseif abs(N-G)<=epsilon
+             I=N;
+             Err=abs(N-G);
+             A(2,2)=A(2,2)+1;
+         else% newton cotes not in error ranges -> somethings wrong -> divide
              [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
              [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
              I=[I1,I2];
@@ -86,10 +90,14 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon, A, x, alpha, w, Nmin, Nmax, Gmin, G
          end
      elseif (~isnan(G) && ~isinf(G)) % gauss worked best
         if (((isnan(N)||abs(N-G)<=abs(N*eN))) || abs(b-a)< epsilon) % gauss result is in error ranges
-            I=G;
-            Err=eG;
-            A(2,3)=A(2,3)+1;% statistics array
-         else % gauss not in error ranges -> somethings wrong -> divide
+             I=G;
+             Err=eG;
+             A(2,3)=A(2,3)+1;% statistics array
+        elseif abs(G-N)<epsilon
+             I=G;
+             Err=abs(G-N);
+             A(2,3)=A(2,3)+1;% statistics array
+        else % gauss not in error ranges -> somethings wrong -> divide
              [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
              [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
              I=[I1,I2];
