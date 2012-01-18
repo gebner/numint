@@ -1,4 +1,4 @@
-function [I,Err,A]=mulDimIntOpt(f,a,b,epsilon,A,Gmin, Gmax, Nmin, Nmax, w,p,alpha)
+function [I,Err,A]=mulDimIntOpt(f,a,b,epsilon,Gmin, Gmax, Nmin, Nmax, w,p,alpha)
 % MULDIMINTOPT multidimensional integration with preevaluated coefficients
 % optimized version of mulDimInt
 % @param[in]  f       function pointer
@@ -17,13 +17,11 @@ function [I,Err,A]=mulDimIntOpt(f,a,b,epsilon,A,Gmin, Gmax, Nmin, Nmax, w,p,alph
 % @param[out] Err     error approximation
 % @param[in,out] A       statistics array (optional)
 
-if (nargin <5)
-    A = zeros(2,4);
-end
-if (nargin<12)
-    Gmin = 2;Gmax = 4;
+
+if (nargin<11)
+    Gmin = 4;Gmax = 6;
     [p,alpha] = gauss_arrays(Gmin, Gmax+1);
-    Nmin = 2; Nmax = 6;
+    Nmin = 4; Nmax = 8;
     w = newton_cotes_weights(Nmin, Nmax);
 end
 s=length(a);
@@ -31,9 +29,10 @@ if (s ~= length(b)) %number of lower != number of upper bounds
    error('Boundries dont match!');
 end
 if s==1 %one dimensional
-    [I,Err,A]=NumInt(@(x) mapWithStats(f,x),a,b,epsilon,A,Gmin,Gmax,Nmin,Nmax, w,p,alpha);
+    [I,Err,A]=NumInt(@(x) mapWithStats(f,x),a,b,epsilon,Gmin,Gmax,Nmin,Nmax, w,p,alpha);
+   
 else %more than one dimension left
-    [I,Err,A]=NumInt(@(x) dimDown(f,x,a(2:end),b(2:end),epsilon, A, Gmin, Gmax, Nmin, Nmax,w,p,alpha),a(1),b(1),epsilon,A, Gmin,Gmax,Nmin,Nmax,w,p,alpha);
+    [I,Err,A]=NumInt(@(x) dimDown(f,x,a(2:end),b(2:end),epsilon,  Gmin, Gmax, Nmin, Nmax,w,p,alpha),a(1),b(1),epsilon, Gmin,Gmax,Nmin,Nmax,w,p,alpha);
 end 
 end
 
@@ -53,13 +52,14 @@ end
 % @param[in] alpha      gauss weights, preevaluated for optimization
 % @param[in,out] A    statistics array 
 % @param[out] z       2 x length(X) array containing integral values and errors
-function [z,A] =dimDown(f,X,a,b,epsilon,A,Gmin, Gmax, Nmin, Nmax, w, p, alpha)
-
+function [z,A] =dimDown(f,X,a,b,epsilon,Gmin, Gmax, Nmin, Nmax, w, p, alpha)
+A=zeros(2,4);
 len = size(X,2);
 z=zeros(2,len);
 
 for n = 1:len % evaluate for fixed first variable x = x(n)
-    [z(1,n), z(2,n), A] = mulDimIntOpt(@(y) f([X(n),y]),a,b,epsilon, A,Gmin, Gmax, Nmin, Nmax, w, p, alpha);
+    [z(1,n), z(2,n), At] = mulDimIntOpt(@(y) f([X(n),y]),a,b,epsilon, Gmin, Gmax, Nmin, Nmax, w, p, alpha);
+    A=At+A;
 end
 
 end

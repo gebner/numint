@@ -1,4 +1,4 @@
-function [I,Err,A]=NumInt(f,a,b,epsilon,A,Gmin,Gmax,Nmin,Nmax,w,x,alpha)
+function [I,Err,A]=NumInt(f,a,b,epsilon,Gmin,Gmax,Nmin,Nmax,w,x,alpha)
 % NUMINT performs numeric integration
 % @param[in]    f       function pointer
 % @param[in]    a       lower bound
@@ -16,18 +16,17 @@ function [I,Err,A]=NumInt(f,a,b,epsilon,A,Gmin,Gmax,Nmin,Nmax,w,x,alpha)
 % @param[in] Nmax       newton cotes maximum index (optional, if preevaluated)
   
     if(nargin<5)
-      A = zeros(2,4);
       f = @(x) mapWithStats(f,x); % add dummy stats array
     end
     %set boundries
-    if nargin<7
+    if nargin<6
       Gmin = 2; Gmax = 4; %index constants for gauss integral
     end
-    if nargin<9
+    if nargin<8
       Nmin = 2; Nmax = 6; %index constants for newton cotes integral
     end
     %eval weigths
-    if nargin<12
+    if nargin<11
         [x,alpha] = gauss_arrays(Gmin, Gmax+1);
         w = newton_cotes_weights(Nmin, Nmax);
     end
@@ -36,12 +35,12 @@ function [I,Err,A]=NumInt(f,a,b,epsilon,A,Gmin,Gmax,Nmin,Nmax,w,x,alpha)
     end
     
     %perform evaluation
-    [I,Err,A]=NumIntStep(f,a,b,epsilon,A,x,alpha, w, Nmin, Nmax, Gmin, Gmax);
+    [I,Err,A]=NumIntStep(f,a,b,epsilon,x,alpha, w, Nmin, Nmax, Gmin, Gmax);
     I=sum(I); % sum of all parts
     
 end
 
-function [I,Err,A]=NumIntStep(f,a,b,epsilon, A, x, alpha, w, Nmin, Nmax, Gmin, Gmax)
+function [I,Err,A]=NumIntStep(f,a,b,epsilon, x, alpha, w, Nmin, Nmax, Gmin, Gmax)
 %  NUMINTSTEP divides the intervall and chooses the algorithm
 % @param[in]    f       function pointer
 % @param[in]    a       lower bound
@@ -60,28 +59,32 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon, A, x, alpha, w, Nmin, Nmax, Gmin, G
 % @param[out]    Err    error (a posteriori)
 % @param[out]   A     statistics array
 
- [N, eN, A] = newton_cotes(f, a, b, epsilon,A, Nmin, Nmax, w); %try newton cotes
+ [N, eN, A] = newton_cotes(f, a, b, epsilon, Nmin, Nmax, w); %try newton cotes
  if isnan(eN) || isinf(eN)
      eN=inf;
  end
- [G,eG,A]=gauss(f,a,b,epsilon,A, Gmin, Gmax, x, alpha); %try gauss
+ [G,eG,AG]=gauss(f,a,b,epsilon, Gmin, Gmax, x, alpha); %try gauss
  if isnan(eG) || isinf(eG)
      eG=inf;
  end
+ A=AG+A;
  % decide what to do
  if ((min([eN,eG])<epsilon && ((~isnan(G) && ~isinf(G))||(~isnan(N) && ~isinf(N))))|| abs(b-a) < epsilon) % is epsilon plausible
      if (~isnan(N) && ~isinf(N) && (eN<=eG || (isnan(eG) || isinf(eG)))) % newton cotes worked best
          if ((((isnan(G)||abs(N-G)<=abs(G*eG)))) || abs(b-a) < epsilon) % newton cotes result is in error ranges
              I=N;
              Err=eN;
+             
              A(2,2)=A(2,2)+1; % statistics array
          elseif abs(N-G)<=epsilon
              I=N;
              Err=abs(N-G);
              A(2,2)=A(2,2)+1;
          else% newton cotes not in error ranges -> somethings wrong -> divide
-             [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
-             [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
+             [I1,E1,Az]=NumIntStep(f,a,(a+b)/2,epsilon, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
+             A=A+Az;
+             [I2,E2,Az]=NumIntStep(f,(a+b)/2,b,epsilon, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
+             A=A+Az;
              I=[I1,I2];
              int1 = sum(I1);
              int2 = sum(I2);
@@ -98,8 +101,10 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon, A, x, alpha, w, Nmin, Nmax, Gmin, G
              Err=abs(G-N);
              A(2,3)=A(2,3)+1;% statistics array
         else % gauss not in error ranges -> somethings wrong -> divide
-             [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
-             [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
+             [I1,E1,Az]=NumIntStep(f,a,(a+b)/2,epsilon, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
+             A=A+Az;
+             [I2,E2,Az]=NumIntStep(f,(a+b)/2,b,epsilon, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
+             A=A+Az;
              I=[I1,I2];
              int1 = sum(I1);
              int2 = sum(I2);
@@ -110,8 +115,10 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon, A, x, alpha, w, Nmin, Nmax, Gmin, G
          error('no valid result using the implemented integration methods');
      end
  else % epsilon too small
-     [I1,E1,A]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
-     [I2,E2,A]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
+     [I1,E1,Az]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
+     A=A+Az;
+     [I2,E2,Az]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
+     A=A+Az;
      I=[I1,I2];
      A(1,4)=A(1,4)+1;
      int1 = sum(I1);

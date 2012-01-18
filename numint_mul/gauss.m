@@ -1,4 +1,4 @@
-function [integral, failure, A] = gauss(f,a,b, epsilon, A, iMin, iMax, x, alpha)
+function [integral, failure, A] = gauss(f,a,b, epsilon, iMin, iMax, x, alpha)
 %INTEGRIEREN_GAUSS Summary of this function goes here
 % @param[in] f          function pointer
 % @param[in] a          lower bound
@@ -11,16 +11,17 @@ function [integral, failure, A] = gauss(f,a,b, epsilon, A, iMin, iMax, x, alpha)
 % @param[out] integral  evaluated value
 % @param[out] failure   evaluation failure (a posteriori)
 % @param[out] A         statistics array
+
+A=zeros(2,4);
 if (nargin <5)
-    A=zeros(2,4);
     f = @(x) mapWithStats(f,x); % add dummy stats array
 end
 
-if(nargin < 7)
+if(nargin < 6)
     iMin = 8;
     iMax = 10;
 end
-if (nargin < 9)
+if (nargin < 8)
     [x, alpha] = gauss_arrays(iMin, iMax+1);
 end
 failure = Inf;
@@ -31,7 +32,7 @@ while (failure > epsilon && i <= iMax)
    wert_alt = integral;
    %evaluate integral
    [integral,Err,At] = gauss_quadratur(f,a,b,x,alpha,i);
-   A = A+At; %refresh statistics
+   A = At; %refresh statistics
    
    % get failure estimation
    if(integral~=0)

@@ -1,4 +1,4 @@
-function [val, failure,A] = newton_cotes(f, a, b, epsilon, A, iMin, iMax, w)
+function [val, failure,A] = newton_cotes(f, a, b, epsilon, iMin, iMax, w)
 % NEWTON_COTES evaluates the integral \int_a^b f(x) dx using the newton cotes method
 % @param[in] f          function pointer
 % @param[in] a          lower bound
@@ -10,16 +10,17 @@ function [val, failure,A] = newton_cotes(f, a, b, epsilon, A, iMin, iMax, w)
 % @param[in,out] A     statistics array (optional)
 % @param[out] integral  evaluated value
 % @param[out] failure   evaluation failure (a posteriori)
+
+A=zeros(2,4);
 if (nargin < 5)
-    A=zeros(2,4);
     f = @(x) mapWithStats(f,x); % add dummy stats array
 end
 
-if (nargin < 7)
+if (nargin < 6)
     iMin = 8;
     iMax = 12;
 end
-if (nargin < 8)
+if (nargin < 7)
     w = newton_cotes_weights(iMin, iMax);
 end
 
