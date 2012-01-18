@@ -1,5 +1,5 @@
 
-function [I,Err,A]=mulDimIntGauss(f,a,b,epsilon,A,Gmin, Gmax, p,alpha)
+function [I,Err,A]=mulDimIntGauss(f,a,b,epsilon,Gmin, Gmax, p,alpha)
 % MULDIMINTGAUSS multidimensional integration with preevaluated coefficients
 % optimized version of mulDimInt
 % @param[in]  f       function pointer
@@ -15,10 +15,8 @@ function [I,Err,A]=mulDimIntGauss(f,a,b,epsilon,A,Gmin, Gmax, p,alpha)
 % @param[out] Err     error approximation
 % @param[in,out] A       statistics array (optional)
 
-if (nargin <5)
-    A = zeros(2,4);
-end
-if (nargin<9)
+
+if (nargin<8)
     Gmin = 4;Gmax = 6;
     [p,alpha] = gauss_arrays(Gmin, Gmax+1);
 end
@@ -27,9 +25,9 @@ if (s ~= length(b)) %number of lower != number of upper bounds
    error('Boundries dont match!');
 end
 if s==1 %one dimensional
-    [I,Err,A]=gauss(@(x) mapWithStats(f,x),a,b,epsilon,A,Gmin,Gmax,p,alpha);
+    [I,Err,A]=gauss(@(x) mapWithStats(f,x),a,b,epsilon,Gmin,Gmax,p,alpha);
 else %more than one dimension left
-    [I,Err,A]=gauss(@(x) dimDown(f,x,a(2:end),b(2:end),epsilon, A, Gmin, Gmax,p,alpha),a(1),b(1),epsilon,A, Gmin,Gmax,p,alpha);
+    [I,Err,A]=gauss(@(x) dimDown(f,x,a(2:end),b(2:end),epsilon,  Gmin, Gmax,p,alpha),a(1),b(1),epsilon, Gmin,Gmax,p,alpha);
 end 
 end
 
@@ -49,13 +47,13 @@ end
 % @param[in] alpha      gauss weights, preevaluated for optimization
 % @param[in,out] A    statistics array 
 % @param[out] z       2 x length(X) array containing integral values and errors
-function [z,A] =dimDown(f,X,a,b,epsilon,A,Gmin, Gmax, p, alpha)
+function [z,A] =dimDown(f,X,a,b,epsilon,Gmin, Gmax, p, alpha)
 
 len = size(X,2);
 z=zeros(2,len);
-
+A=zeros(2,4);
 for n = 1:len % evaluate for fixed first variable x = x(n)
-    [z(1,n), z(2,n), A] = mulDimIntGauss(@(y) f([X(n),y]),a,b,epsilon, A,Gmin, Gmax, p, alpha);
+    [z(1,n), z(2,n)] = mulDimIntGauss(@(y) f([X(n),y]),a,b,epsilon, Gmin, Gmax, p, alpha);
 end
 
 end

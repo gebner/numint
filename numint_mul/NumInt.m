@@ -115,9 +115,9 @@ function [I,Err,A]=NumIntStep(f,a,b,epsilon, x, alpha, w, Nmin, Nmax, Gmin, Gmax
          error('no valid result using the implemented integration methods');
      end
  else % epsilon too small
-     [I1,E1,Az]=NumIntStep(f,a,(a+b)/2,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
+     [I1,E1,Az]=NumIntStep(f,a,(a+b)/2,epsilon, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
      A=A+Az;
-     [I2,E2,Az]=NumIntStep(f,(a+b)/2,b,epsilon,A, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
+     [I2,E2,Az]=NumIntStep(f,(a+b)/2,b,epsilon, x, alpha, w, max(Nmax-2,Nmin), Nmax, max(Gmax-2,Gmin), Gmax);
      A=A+Az;
      I=[I1,I2];
      A(1,4)=A(1,4)+1;
